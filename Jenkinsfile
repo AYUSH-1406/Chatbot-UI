@@ -8,6 +8,11 @@ pipeline {
         CLUSTER_NAME = "chatbot-eks"
     }
 
+          stage('Clean Workspace') {
+    steps {
+        deleteDir()
+    }
+}
     stages {
 
         stage('Checkout') {
@@ -16,11 +21,7 @@ pipeline {
             }
         }
 
-        stage('Clean Workspace') {
-    steps {
-        deleteDir()
-    }
-}
+  
 
         stage('SAST Scan (Filesystem)') {
             steps {
