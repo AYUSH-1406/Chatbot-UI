@@ -62,11 +62,11 @@ pipeline {
         }
 
         stage('Terraform Init') {
-             steps {
-    dir('Terraform') {
-        sh 'terraform init -reconfigure -input=false'
+    steps {
+        dir('Terraform') {
+            sh 'terraform init -reconfigure -migrate-state -input=false'
+        }
     }
-             }
 }
 
         stage('Terraform Drift Detection') {
