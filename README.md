@@ -1,126 +1,220 @@
-# Chatbot UI
 
-Chatbot UI is an advanced chatbot kit for OpenAI's chat models built on top of [Chatbot UI Lite](https://github.com/mckaywrigley/chatbot-ui-lite) using Next.js, TypeScript, and Tailwind CSS.
 
-See a [demo](https://twitter.com/mckaywrigley/status/1640380021423603713?s=46&t=AowqkodyK6B4JccSOxSPew).
+# 🚀 EKS DevSecOps Chatbot Platform
 
-![Chatbot UI](./public/screenshot.png)
+Production-grade 1-tier Chatbot application deployed on Amazon EKS using pure Terraform and secured with a full DevSecOps Jenkins pipeline including drift detection and container security scanning.
 
-## Updates
+---
 
-Chatbot UI will be updated over time.
+<img width="1413" height="395" alt="image" src="https://github.com/user-attachments/assets/309c74ae-92c6-4843-92d2-417aac058294" />
+<img width="1919" height="967" alt="image" src="https://github.com/user-attachments/assets/511c54a9-59e1-47dd-8f68-0603c0a94e47" />
 
-Expect frequent improvements.
+## 📌 Project Overview
 
-**Next up:**
+This project demonstrates a complete production-level DevOps & DevSecOps implementation including:
 
-- [ ] Delete messages
-- [ ] More model settings
-- [ ] Plugins
+* Custom VPC architecture
+* Amazon EKS cluster (no Terraform modules used)
+* Dockerized Next.js application
+* Amazon ECR image registry
+* AWS Load Balancer Controller (ALB Ingress)
+* Jenkins CI/CD pipeline
+* Terraform remote backend (S3 + DynamoDB)
+* Terraform drift detection (exit-code based)
+* Container vulnerability scanning (Trivy)
+* SAST security scanning
+* Rolling deployments to Kubernetes
 
-**Recent updates:**
+The application is a stateless chatbot UI that communicates with the OpenAI API.
 
-- [x] Prompt templates (3/27/23)
-- [x] Regenerate & edit responses (3/25/23)
-- [x] Folders (3/24/23)
-- [x] Search chat content (3/23/23)
-- [x] Stop message generation (3/22/23)
-- [x] Import/Export chats (3/22/23)
-- [x] Custom system prompt (3/21/23)
-- [x] Error handling (3/20/23)
-- [x] GPT-4 support (access required) (3/20/23)
-- [x] Search conversations (3/19/23)
-- [x] Code syntax highlighting (3/18/23)
-- [x] Toggle sidebar (3/18/23)
-- [x] Conversation naming (3/18/23)
-- [x] Github flavored markdown (3/18/23)
-- [x] Add OpenAI API key in app (3/18/23)
-- [x] Markdown support (3/17/23)
+---
 
-## Modifications
-
-Modify the chat interface in `components/Chat`.
-
-Modify the sidebar interface in `components/Sidebar`.
-
-Modify the system prompt in `utils/index.ts`.
-
-## Deploy
-
-**Vercel**
-
-Host your own live version of Chatbot UI with Vercel.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmckaywrigley%2Fchatbot-ui)
-
-**Replit**
-
-Fork Chatbot UI on Replit [here](https://replit.com/@MckayWrigley/chatbot-ui-pro?v=1).
-
-**Docker**
-
-Build locally:
-
-```shell
-docker build -t chatgpt-ui .
-docker run -e OPENAI_API_KEY=xxxxxxxx -p 3000:3000 chatgpt-ui
-```
-
-Pull from ghcr:
+## 🏗 Architecture
 
 ```
-docker run -e OPENAI_API_KEY=xxxxxxxx -p 3000:3000 ghcr.io/mckaywrigley/chatbot-ui:main
+User
+  ↓
+Application Load Balancer (Public Subnet)
+  ↓
+Amazon EKS Cluster (Private Subnets)
+  ↓
+Kubernetes Service
+  ↓
+Chatbot Pods (Docker container from ECR)
+  ↓
+Outbound NAT → OpenAI API
 ```
 
-## Running Locally
+---
 
-**1. Clone Repo**
+## 🧱 Infrastructure Stack
+
+| Component               | Technology         |
+| ----------------------- | ------------------ |
+| Cloud Provider          | AWS                |
+| Container Orchestration | Amazon EKS         |
+| Infrastructure as Code  | Terraform          |
+| Remote State            | S3 + DynamoDB      |
+| CI/CD                   | Jenkins            |
+| Container Registry      | Amazon ECR         |
+| Security Scanning       | Trivy              |
+| Ingress                 | AWS ALB Controller |
+| Container Runtime       | Docker             |
+| Application             | Next.js            |
+
+---
+
+## 🔐 DevSecOps Pipeline Stages
+
+Pipeline includes:
+
+* ✅ Checkout from GitHub
+* ✅ SAST filesystem scan
+* ✅ Docker build
+* ✅ Container vulnerability scan
+* ✅ Push to ECR
+* ✅ Terraform init
+* ✅ Drift detection (`terraform plan -detailed-exitcode`)
+* ✅ Conditional Terraform apply
+* ✅ Rolling deployment to EKS
+
+### Drift Detection Logic
+
+| Exit Code | Meaning        |
+| --------- | -------------- |
+| 0         | No changes     |
+| 2         | Drift detected |
+| 1         | Error          |
+
+Apply runs only if drift is detected.
+
+---
+
+## 📁 Repository Structure
+
+```
+.
+├── Terraform/                # Terraform Infrastructure
+│   ├── provider.tf
+│   ├── backend.tf
+│   ├── vpc.tf
+│   ├── iam.tf
+│   ├── eks.tf
+│   ├── nodegroup.tf
+│   ├── ecr.tf
+│   └── outputs.tf
+│
+├── K8s/                  # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── ingress.yaml
+│
+├── Dockerfile
+├── Jenkinsfile
+└── README.md
+```
+
+---
+
+## 🌐 Deployment Workflow
+
+1. Developer pushes code
+2. Jenkins triggers pipeline
+3. Security scans run
+4. Docker image built
+5. Image scanned for vulnerabilities
+6. Image pushed to ECR
+7. Terraform drift detection runs
+8. Infra updated only if drift exists
+9. Kubernetes rolling deployment triggered
+
+Zero downtime deployment.
+
+---
+
+## 🔒 Security Features
+
+* Non-root container execution
+* Resource limits defined
+* Vulnerability scanning (Trivy)
+* ECR image scanning enabled
+* Terraform state locking
+* Remote state encryption
+* Drift detection enforcement
+
+---
+
+## 📦 Terraform Remote Backend
+
+```hcl
+backend "s3" {
+  bucket         = "your-terraform-state-bucket"
+  key            = "eks/terraform.tfstate"
+  region         = "ap-south-1"
+  dynamodb_table = "terraform-locks"
+  encrypt        = true
+}
+```
+
+---
+
+## 🚀 How to Deploy
+
+### 1️⃣ Provision Infrastructure
 
 ```bash
-git clone https://github.com/mckaywrigley/chatbot-ui.git
+cd Terraform
+terraform init
+terraform apply
 ```
 
-**2. Install Dependencies**
+### 2️⃣ Push Docker Image
 
 ```bash
-npm i
+docker build -t chatbot-ui .
+docker tag chatbot-ui:latest <ECR_URL>
+docker push <ECR_URL>
 ```
 
-**3. Provide OpenAI API Key**
-
-Create a .env.local file in the root of the repo with your OpenAI API Key:
+### 3️⃣ Deploy to EKS
 
 ```bash
-OPENAI_API_KEY=YOUR_KEY
+kubectl apply -f k8s/
 ```
 
-> You can set `OPENAI_API_HOST` where access to the official OpenAI host is restricted or unavailable, allowing users to configure an alternative host for their specific needs.
+---
 
-> Additionally, if you have multiple OpenAI Organizations, you can set `OPENAI_ORGANIZATION` to specify one.
+## 🧠 Learning Outcomes
 
-**4. Run App**
+This project demonstrates:
 
-```bash
-npm run dev
-```
+* Building EKS without Terraform modules
+* Designing production VPC architecture
+* Implementing DevSecOps pipeline
+* Infrastructure drift detection
+* Secure CI/CD implementation
+* Rolling Kubernetes deployments
+* Real-world cloud production patterns
 
-**5. Use It**
+---
 
-You should be able to start chatting.
+## 📈 Future Enhancements
 
-## Configuration
+* Horizontal Pod Autoscaler
+* Cluster Autoscaler
+* GitOps (ArgoCD)
+* OPA policy enforcement
+* Prometheus + Grafana monitoring
+* Multi-environment (staging/prod)
+* Blue/Green deployment strategy
 
-When deploying the application, the following environment variables can be set:
+---
 
-| Environment Variable  | Default value                  | Description                                             |
-| --------------------- | ------------------------------ | ------------------------------------------------------- |
-| OPENAI_API_KEY        |                                | The default API key used for authentication with OpenAI |
-| DEFAULT_MODEL         | `gpt-3.5-turbo`                | The default model to use on new conversations           |
-| DEFAULT_SYSTEM_PROMPT | [see here](utils/app/const.ts) | The defaut system prompt to use on new conversations    |
+## 👨‍💻 Author
 
-If you do not provide an OpenAI API key with `OPENAI_API_KEY`, users will have to provide their own key.
-If you don't have an OpenAI API key, you can get one [here](https://platform.openai.com/account/api-keys).
+Built as a complete end-to-end DevOps & DevSecOps production project.
 
-## Contact
+---
 
-If you have any questions, feel free to reach out to me on [Twitter](https://twitter.com/mckaywrigley).
+🚀
