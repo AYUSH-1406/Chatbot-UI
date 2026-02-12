@@ -64,7 +64,7 @@ pipeline {
         stage('Terraform Init') {
     steps {
         dir('Terraform') {
-            sh 'terraform init -reconfigure -migrate-state -input=false'
+            sh 'terraform init -input=false'
         }
     }
 }
