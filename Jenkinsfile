@@ -61,6 +61,15 @@ pipeline {
             }
         }
 
+        stage('Clean Terraform Cache') {
+    steps {
+        dir('Terraform') {
+            sh 'rm -rf .terraform'
+            sh 'rm -f .terraform.lock.hcl'
+        }
+    }
+}
+
         stage('Terraform Init') {
     steps {
         dir('Terraform') {
