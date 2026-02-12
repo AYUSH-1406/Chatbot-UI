@@ -71,7 +71,7 @@ pipeline {
 
         stage('Terraform Drift Detection') {
             steps {
-                dir('infra') {
+                dir('Terraform') {
                     sh 'terraform plan -detailed-exitcode || true'
                 }
             }
@@ -79,7 +79,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                dir('infra') {
+                dir('Terraform') {
                     sh 'terraform apply -auto-approve'
                 }
             }
