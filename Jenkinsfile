@@ -62,9 +62,11 @@ pipeline {
         }
 
         stage('Terraform Init') {
+             steps {
     dir('Terraform') {
         sh 'terraform init -reconfigure'
     }
+             }
 }
 
         stage('Terraform Drift Detection') {
