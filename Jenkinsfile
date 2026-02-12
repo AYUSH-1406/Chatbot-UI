@@ -61,7 +61,7 @@ pipeline {
             }
         }
 
-        sstage('Terraform Init') {
+        stage('Terraform Init') {
     dir('Terraform') {
         sh 'terraform init -reconfigure'
     }
