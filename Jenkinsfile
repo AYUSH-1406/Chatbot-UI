@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = "ap-south-1"
-        ACCOUNT_ID = "203071037199"
-        ECR_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/chatbot-ui"
+        AWS_REGION   = "ap-south-1"
+        ACCOUNT_ID   = "203071037199"
+        ECR_REPO     = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/chatbot-ui"
         CLUSTER_NAME = "chatbot-eks"
     }
-
 
     stages {
 
@@ -16,8 +15,6 @@ pipeline {
                 checkout scm
             }
         }
-
-  
 
         stage('SAST Scan (Filesystem)') {
             steps {
@@ -31,18 +28,18 @@ pipeline {
             }
         }
 
-       stage('Container Vulnerability Scan') {
-    steps {
-        script {
-            sh '''
-            trivy image \
-              --severity CRITICAL \
-              --ignore-unfixed \
-              chatbot-ui:latest || true
-            '''
+        stage('Container Vulnerability Scan') {
+            steps {
+                script {
+                    sh '''
+                        trivy image \
+                          --severity CRITICAL \
+                          --ignore-unfixed \
+                          chatbot-ui:latest || true
+                    '''
+                }
+            }
         }
-    }
-}
 
         stage('Login to ECR') {
             steps {
@@ -65,21 +62,21 @@ pipeline {
         }
 
         stage('Clean Terraform Cache') {
-    steps {
-        dir('Terraform') {
-            sh 'rm -rf .terraform'
-            sh 'rm -f .terraform.lock.hcl'
+            steps {
+                dir('Terraform') {
+                    sh 'rm -rf .terraform'
+                    sh 'rm -f .terraform.lock.hcl'
+                }
+            }
         }
-    }
-}
 
         stage('Terraform Init') {
-    steps {
-        dir('Terraform') {
-            sh 'terraform init -input=false'
+            steps {
+                dir('Terraform') {
+                    sh 'terraform init -input=false'
+                }
+            }
         }
-    }
-}
 
         stage('Terraform Drift Detection') {
             steps {
@@ -98,28 +95,28 @@ pipeline {
         }
 
         stage('Deploy to EKS') {
-    steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-            sh '''
-                aws eks update-kubeconfig \
-                  --region $AWS_REGION \
-                  --name $CLUSTER_NAME
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    sh '''
+                        aws eks update-kubeconfig \
+                          --region $AWS_REGION \
+                          --name $CLUSTER_NAME
 
-                # Apply all Kubernetes manifests
-                kubectl apply -f K8s/
+                        # Apply all Kubernetes manifests
+                        kubectl apply -f K8s/
 
-                # Update image
-                kubectl set image deployment/chatbot-ui \
-                  chatbot-ui=$ECR_REPO:latest \
-                  -n chatbot
+                        # Update image
+                        kubectl set image deployment/chatbot-ui \
+                          chatbot-ui=$ECR_REPO:latest \
+                          -n chatbot
 
-                # Wait for rollout
-                kubectl rollout status deployment/chatbot-ui -n chatbot
-            '''
+                        # Wait for rollout
+                        kubectl rollout status deployment/chatbot-ui -n chatbot
+                    '''
+                }
+            }
         }
     }
-}
-
 
     post {
         success {
