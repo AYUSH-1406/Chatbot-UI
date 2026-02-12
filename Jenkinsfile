@@ -98,18 +98,28 @@ pipeline {
         }
 
         stage('Deploy to EKS') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                    sh '''
-                        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-                        kubectl set image deployment/chatbot-ui \
-                        chatbot-ui=$ECR_REPO:latest \
-                        -n chatbot
-                    '''
-                }
-            }
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+            sh '''
+                aws eks update-kubeconfig \
+                  --region $AWS_REGION \
+                  --name $CLUSTER_NAME
+
+                # Apply all Kubernetes manifests
+                kubectl apply -f K8s/
+
+                # Update image
+                kubectl set image deployment/chatbot-ui \
+                  chatbot-ui=$ECR_REPO:latest \
+                  -n chatbot
+
+                # Wait for rollout
+                kubectl rollout status deployment/chatbot-ui -n chatbot
+            '''
         }
     }
+}
+
 
     post {
         success {
