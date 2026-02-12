@@ -16,6 +16,12 @@ pipeline {
             }
         }
 
+        stage('Clean Workspace') {
+    steps {
+        deleteDir()
+    }
+}
+
         stage('SAST Scan (Filesystem)') {
             steps {
                 sh 'trivy fs --severity HIGH,CRITICAL .'
