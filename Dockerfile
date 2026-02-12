@@ -1,60 +1,29 @@
-# ===============================
-# Base Image
-# ===============================
-FROM node:20-alpine AS base
-
-RUN apk update && apk upgrade
+# ---- Base Node ----
+FROM node:19-alpine AS base
 WORKDIR /app
+COPY package*.json ./
 
-# ===============================
-# Dependencies Stage
-# ===============================
+# ---- Dependencies ----
 FROM base AS dependencies
-
-# Copy package files first for caching
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm ci --omit=dev
-
-# ===============================
-# Build Stage
-# ===============================
-FROM base AS build
-
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies (including dev for build)
 RUN npm ci
 
-# Copy full project
+# ---- Build ----
+FROM dependencies AS build
 COPY . .
-
-# Build Next.js app
 RUN npm run build
 
-# ===============================
-# Production Stage
-# ===============================
-FROM node:20-alpine AS production
-
-RUN apk update && apk upgrade && \
-    addgroup -S appgroup && \
-    adduser -S appuser -G appgroup
-
+# ---- Production ----
+FROM node:19-alpine AS production
 WORKDIR /app
-ENV NODE_ENV=production
-
-# Copy production dependencies
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/public ./public
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/next.config.js ./next.config.js
+COPY --from=build /app/next-i18next.config.js ./next-i18next.config.js
 
-# Copy entire built application
-COPY --from=build /app ./
-
-# Use non-root user
-USER appuser
-
+# Expose the port the app will run on
 EXPOSE 3000
 
+# Start the application
 CMD ["npm", "start"]
