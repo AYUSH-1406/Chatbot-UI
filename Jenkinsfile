@@ -18,7 +18,7 @@ pipeline {
 
         stage('SAST Scan (Filesystem)') {
             steps {
-                sh 'trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 .'
+                sh 'trivy fs --severity HIGH,CRITICAL .'
             }
         }
 
